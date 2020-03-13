@@ -25,3 +25,9 @@ You can access to these web interfaces:
 - spark-master: http://localhost:8080
 - oozie: http://localhost:11000
 - hadoop: http://localhost:9870
+
+Documentation on workflows: 
+https://www.tutorialspoint.com/apache_oozie/apache_oozie_workflow.htm 
+
+Documentation on Spark with oozie:
+https://mapr.com/docs/home/Oozie/RunSparkJobswithOozie.html
