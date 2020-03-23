@@ -10,11 +10,16 @@ At first, create a new directory directly in `hadoop/Utilities/Browse the file s
 
 Create a directory of your choice, in my case I created `/test`
 
-And push the input.txt into the hadoop filesystem with this command: 
+Connect to the `namenode` container: 
 
-`hadoop fs -put input.txt /test`
+`docker exec -ti namenode /bin/bash`
+
+And push the `input.txt` into the hadoop filesystem with this command: 
+
+`hadoop fs -put spark/bin/input.txt /test`
 
 Then, in the spark-master container execute these commands: 
+Remember to connect: `docker exec -ti spark-master /bin/bash`
 
 `cd spark/bin`
 
@@ -23,8 +28,9 @@ Then, in the spark-master container execute these commands:
 You can access to these web interfaces: 
 
 - spark-master: http://localhost:8080
-- oozie: http://localhost:11000
+- oozie: http://localhost:11000 -> to be deleted
 - hadoop: http://localhost:9870
+- airflow: http://localhost:8081
 
 Documentation on workflows: 
 https://www.tutorialspoint.com/apache_oozie/apache_oozie_workflow.htm 
