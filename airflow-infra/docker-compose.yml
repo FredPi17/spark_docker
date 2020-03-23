@@ -12,10 +12,36 @@ services:
       - "8080:8080"
       - "7077:7077"
     environment:
-      - INIT_DAEMON_STEP=setup_spark
+      - "INIT_DAEMON_STEP=setup_spark"
       - "constraint:node==master_node"
     volumes:
-      - ./test.py:/spark/bin/test.py
+      - ./spark/test.py:/spark/bin/test.py
+
+  spark-worker-1:
+    image: bde2020/spark-worker:2.4.5-hadoop2.7
+    container_name: spark-worker-1
+    networks:
+      - mynetwork
+    depends_on:
+      - spark-master
+    ports:
+      - "8081"
+    environment:
+      - "SPARK_MASTER=spark://spark-master:7077"
+      - "constraint:node==worker_one"
+
+  spark-worker-2:
+    image: bde2020/spark-worker:2.4.5-hadoop2.7
+    container_name: spark-worker-2
+    networks:
+      - mynetwork
+    depends_on:
+      - spark-master
+    ports:
+      - "8081"
+    environment:
+      - "SPARK_MASTER=spark://spark-master:7077"
+      - "constraint:node==worker_two"
 
   namenode:
     image: bde2020/hadoop-namenode:2.0.0-hadoop3.2.1-java8
@@ -29,9 +55,9 @@ services:
     environment:
       - CLUSTER_NAME=test
     env_file:
-      - ./hadoop.env
+      - hadoop/hadoop.env
     volumes:
-      - ../input.txt:/spark/bin/input.txt
+      - ./hadoop/input.txt:/spark/bin/input.txt
 
   datanode:
     image: bde2020/hadoop-datanode:2.0.0-hadoop3.2.1-java8
@@ -40,9 +66,11 @@ services:
       - mynetwork
     restart: always
     environment:
-      SERVICE_PRECONDITION: "namenode:9870"
+      - "SERVICE_PRECONDITION=namenode:9870"
     env_file:
-      - ./hadoop.env
+      - ./hadoop/hadoop.env
+    ports:
+      - "9864"
 
   datanode2:
     image: bde2020/hadoop-datanode:2.0.0-hadoop3.2.1-java8
@@ -51,9 +79,11 @@ services:
       - mynetwork
     restart: always
     environment:
-      SERVICE_PRECONDITION: "namenode:9870"
+      - "SERVICE_PRECONDITION=namenode:9870"
     env_file:
-      - ./hadoop.env
+      - ./hadoop/hadoop.env
+    ports:
+      - "9864"
 
   resourcemanager:
     image: bde2020/hadoop-resourcemanager:2.0.0-hadoop3.2.1-java8
@@ -64,7 +94,7 @@ services:
     environment:
       SERVICE_PRECONDITION: "namenode:9000 namenode:9870 datanode:9864"
     env_file:
-      - ./hadoop.env
+      - ./hadoop/hadoop.env
 
   nodemanager1:
     image: bde2020/hadoop-nodemanager:2.0.0-hadoop3.2.1-java8
@@ -75,7 +105,7 @@ services:
     environment:
       SERVICE_PRECONDITION: "namenode:9000 namenode:9870 datanode:9864 resourcemanager:8088"
     env_file:
-      - ./hadoop.env
+      - ./hadoop/hadoop.env
 
   historyserver:
     image: bde2020/hadoop-historyserver:2.0.0-hadoop3.2.1-java8
@@ -86,18 +116,16 @@ services:
     environment:
       SERVICE_PRECONDITION: "namenode:9000 namenode:9870 datanode:9864 resourcemanager:8088"
     env_file:
-      - ./hadoop.env
+      - ./hadoop/hadoop.env
 
-  oozie:
-    image: andlaz/hadoop-oozie
-    container_name: oozie
+  airflow:
+    image: puckel/docker-airflow
+    container_name: airflow
     networks:
       - mynetwork
+    command: ["webserver","pip","install","pyspark"]
     ports:
-      - 11000:11000
-      - 11001:11001
-    command: ["oozied.sh","run"]
-    environment:
-      SERVICE_PRECONDITION: "namenode:9000 namenode:9870 datanode:9864 resourcemanager:8088"
-    env_file:
-      - ./hadoop.env
+      - 8081:8080
+
+    volumes:
+      - ./airflow_files/dags:/usr/local/airflow/dags

@@ -37,3 +37,6 @@ https://www.tutorialspoint.com/apache_oozie/apache_oozie_workflow.htm
 
 Documentation on Spark with oozie:
 https://mapr.com/docs/home/Oozie/RunSparkJobswithOozie.html
+
+Documentation on DAGs for Airflow:
+https://blog.insightdatascience.com/scheduling-spark-jobs-with-airflow-4c66f3144660 
